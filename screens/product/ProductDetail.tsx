@@ -29,7 +29,7 @@ const ProductDetail = ({route, navigation}: any) => {
       .get('https://64440b5e466f7c2b4b60625b.mockapi.io/products/' + id)
       .then(res => {
         setDetail(res.data);
-        console.log('saalm', res.data);
+        console.log(res.data);
 
         setLoading(false);
       });

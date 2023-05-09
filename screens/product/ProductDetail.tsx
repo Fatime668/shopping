@@ -182,10 +182,18 @@ const styles = StyleSheet.create({
   image: {
     width: 360,
     height: 304,
-    marginTop: 20,
     paddingHorizontal: 20,
     backgroundColor: '#fff',
     resizeMode: 'contain',
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5.62,
+    elevation: 7,
   },
   name: {
     fontWeight: '600',

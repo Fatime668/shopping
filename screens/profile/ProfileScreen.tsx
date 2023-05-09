@@ -51,11 +51,25 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   profilebox: {
+    padding: 20,
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginBottom: 20,
+    marginHorizontal: 10,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5.62,
+    elevation: 7,
   },
   txt: {
     fontWeight: '400',
     fontSize: 15,
     color: '#000',
+    marginLeft: 10,
   },
 });

@@ -28,6 +28,8 @@ const TabMain = () => {
         name="Products"
         component={ProductMainStack}
         options={({route}: any) => ({
+          tabBarShowLabel: false,
+
           headerShown: false,
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
@@ -36,7 +38,7 @@ const TabMain = () => {
             }
             return {
               borderTopWidth: 0,
-              height: 70,
+              height: 100,
             };
           })(route),
           tabBarIcon: ({focused}) => (
@@ -57,6 +59,8 @@ const TabMain = () => {
         name="Profile"
         component={ProfileScreen}
         options={({route}: any) => ({
+          tabBarShowLabel: false,
+
           headerShown: false,
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
@@ -65,7 +69,7 @@ const TabMain = () => {
             }
             return {
               borderTopWidth: 0,
-              height: 70,
+              height: 100,
             };
           })(route),
           tabBarIcon: ({focused}) => (
@@ -87,6 +91,8 @@ const TabMain = () => {
         component={BasketScreen}
         initialParams={{cartItems}}
         options={({route}: any) => ({
+          tabBarShowLabel: false,
+
           headerShown: false,
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
@@ -95,7 +101,7 @@ const TabMain = () => {
             }
             return {
               borderTopWidth: 0,
-              height: 70,
+              height: 100,
             };
           })(route),
           tabBarIcon: ({focused}) => (
@@ -116,6 +122,7 @@ const TabMain = () => {
         name="Favorite"
         component={FavoritesScreen}
         options={({route}: any) => ({
+          tabBarShowLabel: false,
           headerShown: false,
           tabBarStyle: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
@@ -124,7 +131,7 @@ const TabMain = () => {
             }
             return {
               borderTopWidth: 0,
-              height: 70,
+              height: 100,
             };
           })(route),
           tabBarIcon: ({focused}) => (

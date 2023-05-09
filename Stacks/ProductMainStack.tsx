@@ -29,46 +29,6 @@ const ProductMainStack = ({navigation}: any) => {
       console.error('Error loading cart items:', error);
     }
   };
-  //AddToCart funksiyasi
-  const addToCart = async () => {
-    try {
-      const response = await axios.get(
-        'https://64440b5e466f7c2b4b60625b.mockapi.io/products',
-      ); // API-dan məhsul məlumatlarını almaq üçün GET funksiyasi
-      const product = response.data; // API-dan gələn məhsul obyekti
-      const existingItem = cartItems.find(
-        (item: any) => item.id === product.id,
-      );
-      if (existingItem) {
-        existingItem.quantity += 1;
-        existingItem.totalPrice = existingItem.quantity * existingItem.price;
-        setCartItems([...cartItems]);
-      } else {
-        const newItem = {...product, quantity: 1, totalPrice: product.price};
-        const updatedCart = [...cartItems, newItem];
-        setCartItems(updatedCart);
-      }
-      await AsyncStorage.setItem('cart', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-    }
-  };
-  //TotalPrice
-  const calculateTotalPrice = (items: any) => {
-    let total = 0;
-    items.forEach((item: any) => {
-      total += item.price * item.quantity;
-    });
-    return total;
-  };
-
-  //RemoveBasketData
-  const removeFromCart = (productId: any) => {
-    const updatedCart = cartItems.filter((item: any) => item.id !== productId);
-    setCartItems(updatedCart);
-    calculateTotalPrice(updatedCart);
-    AsyncStorage.setItem('cart', JSON.stringify(updatedCart));
-  };
 
   return (
     <ProductStack.Navigator>
@@ -83,13 +43,12 @@ const ProductMainStack = ({navigation}: any) => {
         options={{
           headerShown: false,
         }}
-        initialParams={{addToCart}}
       />
       <ProductStack.Screen
         name="Basket"
         component={BasketScreen}
         options={{headerShown: false}}
-        initialParams={{cartItems, removeFromCart}}
+        initialParams={{cartItems}}
       />
     </ProductStack.Navigator>
   );

@@ -12,16 +12,48 @@ import {
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {ArrowLeft, Heart} from '../../components/icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProductDetail = ({route, navigation}: any) => {
-  let {addToCart, fetchProductData} = route.params;
   let {id} = route.params;
 
   const [detail, setDetail] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [wishlist, setWishlist] = useState<any>([]);
+  const [isInWishlist, setIsInWishlist] = useState<boolean>(false);
+  const [color, setColor] = useState('#fff');
 
   const goToProduct = () => {
     navigation.navigate('Home');
+  };
+  //Add Basket
+  const handleAddBasket = async () => {
+    let basket: any = await AsyncStorage.getItem('basket');
+    if (!basket) {
+      basket = [];
+      let basketItem = {
+        product: detail,
+        count: 1,
+      };
+      basket.push(basketItem);
+      await AsyncStorage.setItem('basket', JSON.stringify(basket));
+    } else {
+      let parseData = JSON.parse(basket);
+      let basketItem = parseData.find(
+        (item: any) => item.product.id == detail.id,
+      );
+      if (basketItem) {
+        basketItem.count++;
+        await AsyncStorage.setItem('basket', JSON.stringify(parseData));
+      } else {
+        let basketItem = {
+          product: detail,
+          count: 1,
+        };
+        parseData.push(basketItem);
+        await AsyncStorage.setItem('basket', JSON.stringify(parseData));
+      }
+    }
   };
 
   useEffect(() => {
@@ -34,6 +66,45 @@ const ProductDetail = ({route, navigation}: any) => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem('wishlist').then(data => {
+      let wishlist = JSON.parse(data ?? '[]');
+      setWishlist(wishlist);
+    });
+  }, []);
+
+  const wishlistOperations = async (id: any) => {
+    const data = await AsyncStorage.getItem('wishlist');
+
+    if (data) {
+      const parsedData = JSON.parse(data);
+      const existingItem = parsedData.find((item: any) => item === id);
+      if (existingItem) {
+        let filteredProducts = wishlist.filter(
+          (removed: {id: number}) => removed != id,
+        );
+        AsyncStorage.setItem('wishlist', JSON.stringify([...filteredProducts]));
+        setWishlist([...filteredProducts]);
+      } else {
+        setIsInWishlist(true);
+        setColor('#5956E9');
+
+        let newWishlist: any = [...wishlist, id];
+        await AsyncStorage.setItem('wishlist', JSON.stringify(newWishlist));
+        setWishlist(newWishlist);
+        setIsInWishlist(false);
+      }
+    } else {
+      setIsInWishlist(true);
+      setColor('#5956E9');
+
+      let newWishlist: any = [...wishlist, id];
+      await AsyncStorage.setItem('wishlist', JSON.stringify(newWishlist));
+      setWishlist(newWishlist);
+    }
+  };
+
   return (
     <View style={styles.detailpage}>
       <ActivityIndicator animating={loading} color="red" />
@@ -50,8 +121,12 @@ const ProductDetail = ({route, navigation}: any) => {
             <Pressable onPress={() => goToProduct()}>
               <ArrowLeft />
             </Pressable>
-            <Pressable onPress={fetchProductData}>
-              <Heart />
+            <Pressable>
+              <Heart
+                fill={isInWishlist ? color : 'white'}
+                stroke={isInWishlist ? color : '#200E32'}
+                onPress={() => wishlistOperations(detail.id)}
+              />
             </Pressable>
           </View>
           <View>
@@ -84,12 +159,8 @@ const ProductDetail = ({route, navigation}: any) => {
             <Text style={styles.pricetitle}>Price</Text>
             <Text style={styles.total}>$ {detail.price}</Text>
           </View>
-          {/* <TouchableOpacity
-            style={{padding: 5, marginHorizontal: 50, backgroundColor: '#ccc'}}
-            onPress={() => navigation.navigate('Basket')}>
-            <Text>Basket bax</Text>
-          </TouchableOpacity> */}
-          <Pressable style={styles.addtocart} onPress={() => addToCart(detail)}>
+
+          <Pressable style={styles.addtocart} onPress={handleAddBasket}>
             <Text style={styles.txt}>Add to basket</Text>
           </Pressable>
         </View>

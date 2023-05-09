@@ -51,6 +51,7 @@ const HomeScreen = ({navigation, route}: any) => {
         <FlatList
           data={products}
           horizontal
+          showsVerticalScrollIndicator={false}
           renderItem={({item}) => (
             <Pressable
               onPress={() =>
@@ -59,10 +60,10 @@ const HomeScreen = ({navigation, route}: any) => {
               <View>
                 <Image style={styles.image} source={{uri: item.image}} />
                 <View style={styles.boxitem}>
-                  <View>
+                  <View style={styles.txtbox}>
                     <Text style={styles.txtName}>{item.name}</Text>
                     <Text style={styles.txtDesc}>{item.description}</Text>
-                    <Text style={styles.txtPrice}>${item.price}</Text>
+                    <Text style={styles.txtPrice}>$ {item.price}</Text>
                   </View>
                 </View>
               </View>
@@ -94,15 +95,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: 30,
-    paddingVertical: 18,
+    paddingVertical: 14,
     paddingLeft: 60,
     marginTop: 46,
     borderColor: '#C9C9C9',
-    borderWidth: 2,
+    borderWidth: 1,
   },
   searchIcon: {
     fontSize: 25,
-    top: -45,
+    top: -42,
     left: 20,
   },
   title: {
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   tabs: {
-    marginTop: 60,
+    marginTop: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -135,28 +136,42 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
+    padding: 20,
+    backgroundColor: '#fff',
     position: 'relative',
-    borderRadius: 50,
+    borderRadius: 100,
+    transform: [{translateX: 35}],
     top: 80,
-    // backgroundColor: '#9747FF',
-    left: 35,
-    zIndex: 2,
+    resizeMode: 'contain',
+    zIndex: 3,
   },
   boxitem: {
     zIndex: 0,
     width: 200,
+    padding: 10,
     position: 'relative',
-    height: 250,
+    height: 230,
     backgroundColor: '#fff',
     borderRadius: 20,
+    marginBottom: 20,
     marginHorizontal: 10,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5.62,
+    elevation: 7,
+  },
+  txtbox: {
+    alignItems: 'center',
+    top: 90,
   },
   txtName: {
     margin: 2,
-    top: 120,
-    textAlign: 'center',
     fontWeight: '600',
-    fontSize: 22,
+    fontSize: 18,
     color: '#000',
     lineHeight: 22.99,
   },
@@ -164,13 +179,9 @@ const styles = StyleSheet.create({
     margin: 2,
     fontSize: 16,
     fontWeight: '600',
-    top: 120,
-    textAlign: 'center',
   },
   txtPrice: {
     marginTop: 10,
-    top: 120,
-    textAlign: 'center',
     color: '#5956E9',
     fontWeight: '500',
   },

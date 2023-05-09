@@ -1,29 +1,62 @@
 import {Button, StyleSheet, Text, View, Image, Pressable} from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Delete, Notification} from '../../components/icons';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useIsFocused} from '@react-navigation/native';
 import {FlatList, TouchableOpacity} from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BasketScreen = ({route}: any) => {
-  const {cartItems, removeFromCart} = route.params;
-
-  useFocusEffect(() => {
-    removeFromCart;
-  });
-
+const BasketScreen = ({route, navigation}: any) => {
+  const [basket, setBasket] = useState<any>([]);
+  const isFocused = useIsFocused();
   useEffect(() => {
-    console.log('BasketItems güncellendi:', cartItems);
-  }, [cartItems]);
+    if (isFocused) {
+      getBasket();
+    }
+  }, [isFocused]);
 
+  const getBasket = async () => {
+    let basket: any = await AsyncStorage.getItem('basket');
+    setBasket(JSON.parse(basket));
+  };
+  //TotalPrice
+  let totalPrice = () => {
+    let total = 0;
+    if (basket.length > 0) {
+      basket.forEach((item: any) => {
+        total += item.product.price * item.count;
+      });
+    }
+    return total;
+  };
+  //handleDecrease
+  const handleDecrease = async (id: number) => {
+    let item: any = basket.find((p: any) => p.product.id === id);
+    if (item.count >= 1) {
+      item.count--;
+      await AsyncStorage.setItem('basket', JSON.stringify(basket));
+      setBasket([...basket]);
+    }
+  };
+  //handleIncrease
+  const handleIncrease = async (id: number) => {
+    let item: any = basket.find((p: any) => p.product.id === id);
+    if (item.count >= 0) {
+      item.count++;
+      await AsyncStorage.setItem('basket', JSON.stringify(basket));
+      setBasket([...basket]);
+    }
+  };
+  //handleDelete
+
+  const handleDelete = async (id: number) => {
+    let newBasket: any = basket.filter((pr: any) => pr.product.id !== id);
+    await AsyncStorage.setItem('basket', JSON.stringify(newBasket));
+    setBasket([...newBasket]);
+  };
   return (
     <View style={styles.container}>
-      <View style={styles.delete}>
+      <View>
         <Text style={styles.title}>Basket</Text>
-        {cartItems.map((item: any) => (
-          <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-            <Delete />
-          </TouchableOpacity>
-        ))}
       </View>
       <View style={styles.bell}>
         <Notification />
@@ -31,109 +64,92 @@ const BasketScreen = ({route}: any) => {
           Delivery for FREE until the end of the month
         </Text>
       </View>
-      <View style={{flex: 1}}>
-        <View style={styles.cartitem}>
-          <Image
-            style={styles.img}
-            source={{
-              uri: 'https://s3-alpha-sig.figma.com/img/2bcf/f015/088a1086529ff42148b98f993ba52d93?Expires=1684713600&Signature=ha5Wf3iAn3KPieo2-aUSqCn4XPUCdjJHXiXjYbB8WQ79-65rIUtGB4Q-WAcFoIEePUnzL9VM3ATtvCPRdCIVXQXQ2cB4a4LryexE8nrOypAnn50SMdHver8fHYZeTsUYM1if3uaaK5zYIyEELRbCg2g3uiVQzdgECvjrlnyEfMjcHOvV8IGKlll48o~02LNXEKOJc-OXzIZbzbreJRGG-tHulpjBr093fK--L0A8VeYDzZ26G8tnPuUdTIsp6VkZaViOVddkLwKginCbvl~qUDO~JTNpkrT38deGEGjvJEN-iF3Y-rgqZOFmtA1bQwz6gzVowvy5WzeXybcVe2PXzw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4',
-            }}
-          />
-          <View>
-            <Text style={styles.name}>Apple Watch</Text>
-            <Text style={styles.price}>$ 300</Text>
-            <View style={styles.count}>
-              <Text style={styles.quantity}>1</Text>
-              <View style={{flexDirection: 'row', marginLeft: 10}}>
-                <TouchableOpacity style={styles.minus}>
-                  <Text style={styles.minustxt}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.counter}>0</Text>
-                <TouchableOpacity style={styles.plus}>
-                  <Text style={styles.plustxt}>+</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
-      {/* {cartItems.map((item: any) => (
-        <View key={item.id} style={{flex: 1}}>
-          <View style={styles.cartitem}>
-            <Image
-              style={styles.img}
-              source={{
-                uri: item.image,
-              }}
-            />
-            <View>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.price}>$ {item.price}</Text>
-              <View style={styles.count}>
-                <Text style={styles.quantity}>{item.quantity}</Text>
-                <View style={{flexDirection: 'row', marginLeft: 10}}>
-                  <TouchableOpacity style={styles.minus}>
-                    <Text style={styles.minustxt}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.counter}>0</Text>
-                  <TouchableOpacity style={styles.plus}>
-                    <Text style={styles.plustxt}>+</Text>
-                  </TouchableOpacity>
+      {basket && basket.length > 0 ? (
+        <FlatList
+          data={basket}
+          renderItem={({item}: any) => (
+            <View style={{flex: 1}}>
+              <View style={styles.cartitem}>
+                <Image
+                  style={styles.img}
+                  source={{
+                    uri: item.product.image,
+                  }}
+                />
+                <View>
+                  <Text style={styles.name}>{item.product.name}</Text>
+                  <Text style={styles.price}>$ {item.product.price}</Text>
+                  <View style={styles.count}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{marginRight: 10}}>Quantity</Text>
+                      <Pressable
+                        style={styles.minus}
+                        onPress={() => handleDecrease(item.product.id)}>
+                        <Text style={styles.minustxt}>-</Text>
+                      </Pressable>
+                      <Text style={styles.counter}>{item.count}</Text>
+                      <Pressable
+                        onPress={() => handleIncrease(item.product.id)}
+                        style={styles.plus}>
+                        <Text style={styles.plustxt}>+</Text>
+                      </Pressable>
+                    </View>
+                    <View>
+                      <Pressable onPress={() => handleDelete(item.product.id)}>
+                        <Delete />
+                      </Pressable>
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
+          )}
+        />
+      ) : (
+        <View style={styles.empty}>
+          <Text style={styles.emptytxt}>Cart is Empty!</Text>
+          <Pressable
+            style={styles.goShop}
+            onPress={() => navigation.navigate('Products')}>
+            <Text style={{fontSize: 14, fontWeight: 'bold', color: '#fff'}}>
+              Go to Products
+            </Text>
+          </Pressable>
         </View>
-      ))} */}
+      )}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flex: 1,
-          position: 'relative',
-          bottom: -90,
-          marginHorizontal: 20,
-        }}>
-        <Text style={{fontSize: 17, fontWeight: '400', color: '#000'}}>
-          Total
-        </Text>
-        <Text style={{fontSize: 22, fontWeight: '700', color: '#5956E9'}}>
-          $ 945
-        </Text>
-      </View>
+      {
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginVertical: 10,
+            position: 'relative',
+            marginHorizontal: 20,
+          }}>
+          <Text
+            style={{
+              fontSize: 17,
+              paddingVertical: 20,
+              fontWeight: '400',
+              color: '#000',
+              flex: 1,
+            }}>
+            Total
+          </Text>
+          <Text style={{fontSize: 22, fontWeight: '700', color: '#5956E9'}}>
+            $ {totalPrice().toFixed(2)}
+          </Text>
+        </View>
+      }
+
       <Pressable style={styles.checkout}>
         <Text style={styles.txt}>Checkout</Text>
       </Pressable>
-      {/* <View>
-        {cartItems.map((item: any) => (
-          <>
-            <Text key={item.id}>
-              {item.name} - Quantity: {item.quantity}
-            </Text>
-            <Button
-              title="Remove from Cart"
-              onPress={() => removeFromCart(item.id)}
-            />
-          </>
-        ))}
-      </View>  */}
     </View>
   );
 };
-
-// {cartItems.map((item: any) => (
-//   <>
-//     <Text key={item.id}>
-//       {item.name} - Quantity: {item.quantity}
-//     </Text>
-//     <Button
-//       title="Remove from Cart"
-//       onPress={() => removeFromCart(item.id)}
-//     />
-//   </>
-// ))}
 
 export default BasketScreen;
 
@@ -143,14 +159,13 @@ const styles = StyleSheet.create({
     margin: 24,
   },
   title: {
-    textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
-    left: 150,
+    textAlign: 'center',
   },
   bell: {
-    marginTop: 20,
+    marginVertical: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -166,17 +181,25 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   delete: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    textAlign: 'center',
+    justifyContent: 'flex-end',
   },
   cartitem: {
+    flex: 2,
+    height: 120,
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
-    paddingVertical: 10,
-    marginHorizontal: 20,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginBottom: 20,
+    marginHorizontal: 10,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5.62,
+    elevation: 7,
   },
   img: {
     width: 80,
@@ -186,6 +209,7 @@ const styles = StyleSheet.create({
   count: {
     flexDirection: 'row',
   },
+
   name: {
     fontWeight: '600',
     fontSize: 16,
@@ -225,7 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   counter: {
-    color: '#fff',
+    color: '#000',
   },
   minustxt: {
     color: '#fff',
@@ -233,8 +257,24 @@ const styles = StyleSheet.create({
   plustxt: {
     color: '#fff',
   },
+  empty: {
+    marginTop: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptytxt: {
+    color: '#000',
+    fontWeight: '700',
+    fontSize: 25,
+  },
+  goShop: {
+    marginVertical: 20,
+    padding: 10,
+    borderRadius: 15,
+    backgroundColor: '#5956E9',
+  },
   checkout: {
-    paddingVertical: 25,
+    paddingVertical: 20,
     paddingHorizontal: 15,
     backgroundColor: '#5956E9',
     display: 'flex',

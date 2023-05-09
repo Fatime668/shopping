@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     marginHorizontal: 10,
+    resizeMode: 'contain',
   },
   count: {
     flexDirection: 'row',

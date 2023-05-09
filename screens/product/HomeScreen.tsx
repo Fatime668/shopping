@@ -51,7 +51,6 @@ const HomeScreen = ({navigation, route}: any) => {
         <FlatList
           data={products}
           horizontal
-          showsVerticalScrollIndicator={false}
           renderItem={({item}) => (
             <Pressable
               onPress={() =>
@@ -134,6 +133,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   image: {
+    resizeMode: 'contain',
     width: 150,
     height: 150,
     padding: 20,
@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     transform: [{translateX: 35}],
     top: 80,
-    resizeMode: 'contain',
     zIndex: 3,
   },
   boxitem: {

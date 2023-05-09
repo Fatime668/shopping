@@ -13,6 +13,7 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {ArrowLeft, Heart} from '../../components/icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const ProductDetail = ({route, navigation}: any) => {
   let {id} = route.params;
@@ -20,7 +21,7 @@ const ProductDetail = ({route, navigation}: any) => {
   const [detail, setDetail] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [wishlist, setWishlist] = useState<any>([]);
-  const [isInWishlist, setIsInWishlist] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [color, setColor] = useState('#fff');
 
   const goToProduct = () => {
@@ -87,16 +88,16 @@ const ProductDetail = ({route, navigation}: any) => {
         AsyncStorage.setItem('wishlist', JSON.stringify([...filteredProducts]));
         setWishlist([...filteredProducts]);
       } else {
-        setIsInWishlist(true);
+        setIsFavorite(true);
         setColor('#5956E9');
 
         let newWishlist: any = [...wishlist, id];
         await AsyncStorage.setItem('wishlist', JSON.stringify(newWishlist));
         setWishlist(newWishlist);
-        setIsInWishlist(false);
+        setIsFavorite(false);
       }
     } else {
-      setIsInWishlist(true);
+      setIsFavorite(true);
       setColor('#5956E9');
 
       let newWishlist: any = [...wishlist, id];
@@ -123,8 +124,8 @@ const ProductDetail = ({route, navigation}: any) => {
             </Pressable>
             <Pressable>
               <Heart
-                fill={isInWishlist ? color : 'white'}
-                stroke={isInWishlist ? color : '#200E32'}
+                fill={!isFavorite ? color : 'white'}
+                stroke={!isFavorite ? color : '#200E32'}
                 onPress={() => wishlistOperations(detail.id)}
               />
             </Pressable>
@@ -180,10 +181,11 @@ const styles = StyleSheet.create({
   },
   image: {
     width: 360,
-    height: 334,
+    height: 304,
     marginTop: 20,
     paddingHorizontal: 20,
     backgroundColor: '#fff',
+    resizeMode: 'contain',
   },
   name: {
     fontWeight: '600',
@@ -287,6 +289,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
+    marginBottom: 10,
   },
   txt: {
     color: '#fff',
